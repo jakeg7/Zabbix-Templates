@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-03-01T10:02:28Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>CISCO - Failover Status</template>
+            <name>CISCO - Failover Status</name>
+            <description>This template is used to monitor and alert on the failover status of Cisco ASA firewalls. It will trigger if there is a failover event and also trigger if the primary instance of the HA pair is in standby mode.</description>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Failover</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Primary unit</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>SNMPv2-SMI::enterprises.9.9.147.1.2.1.1.1.2.6</snmp_oid>
+                    <key>cfwStatusPrimary</key>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Failover</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{diff()}=1</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>Device failover event detected</name>
+                            <priority>AVERAGE</priority>
+                            <description>A device failover has been detected. Check the status of the active and standby firewalls for a root cause.&#13;
+&#13;
+This usually happens when one or more monitored interfaces on the active firewall change state. It could also be caused by total device failure or power loss to the previously active device.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{iregexp(&quot;^Primary unit \(this device\)$&quot;)}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{iregexp(&quot;^Primary unit \(this device\)$&quot;)}=1</recovery_expression>
+                            <name>Primary unit in standby state</name>
+                            <priority>WARNING</priority>
+                            <description>The primary firewall is currently not active. A change should be raised to failover services back to the primary instance when convenient.&#13;
+&#13;
+This problem will automatically resolve once the primary device is in an active state.</description>
+                            <tags>
+                                <tag>
+                                    <tag>Ticket</tag>
+                                    <value>yes</value>
+                                </tag>
+                            </tags>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Secondary unit</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>SNMPv2-SMI::enterprises.9.9.147.1.2.1.1.1.2.7</snmp_oid>
+                    <key>cfwStatusSecondary</key>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Failover</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>
